@@ -1,0 +1,29 @@
+logging:
+    file: /var/log/coreauth/${spring.application.name}.log 
+    config: classpath:logback-spring.xml
+    level:
+        root: INFO
+        org.springframework: INFO
+        com.lige: INFO
+        
+spring:
+  redis:
+    cluster:
+      nodes: 
+        - 127.0.0.1:7001
+        - 127.0.0.1:7002
+        - 127.0.0.1:7003
+        - 127.0.0.1:7004
+        - 127.0.0.1:7005
+        - 127.0.0.1:7006
+      maxtotal: 20
+      maxidle: 10
+      minidle: 3
+    
+  jpa:
+    hibernate:
+      ddl-auto: none
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/scusers
+    username: root
+    password: ak2s098913
