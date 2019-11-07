@@ -55,6 +55,10 @@ http://maven.apache.org/maven-v4_0_0.xsd">
 		<groupId>redis.clients</groupId>
 		<artifactId>jedis</artifactId>
 	</dependency>
+	<dependency>
+		<groupId>commons-codec</groupId>
+		<artifactId>commons-codec</artifactId>
+	</dependency>
   </dependencies>
   
   <build>

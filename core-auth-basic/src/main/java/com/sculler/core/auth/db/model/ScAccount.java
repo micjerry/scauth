@@ -1,4 +1,4 @@
-package com.sculler.core.auth.model;
+package com.sculler.core.auth.db.model;
 
 import java.sql.Timestamp;
 
@@ -10,7 +10,8 @@ import javax.validation.constraints.Size;
 
 @Entity
 @Table(name="scaccounts")
-public class ScAccount {
+public class ScAccount{
+
 	@Id
 	@Size(max = 32)
 	private String username;
@@ -27,6 +28,8 @@ public class ScAccount {
 	
 	@Size(max = 32)
 	private String mobilephone;
+	
+	private int forbid;
 	
 	private Timestamp createtime;
 
@@ -68,6 +71,14 @@ public class ScAccount {
 
 	public void setMobilephone(String mobilephone) {
 		this.mobilephone = mobilephone;
+	}
+
+	public int getForbid() {
+		return forbid;
+	}
+
+	public void setForbid(int forbid) {
+		this.forbid = forbid;
 	}
 
 	public Timestamp getCreatetime() {
