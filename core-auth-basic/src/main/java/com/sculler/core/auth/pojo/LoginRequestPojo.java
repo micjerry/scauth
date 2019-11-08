@@ -1,6 +1,6 @@
 package com.sculler.core.auth.pojo;
 
-public class AuthRequestPojo {
+public class LoginRequestPojo {
 	private String app;
 	
 	private String username;

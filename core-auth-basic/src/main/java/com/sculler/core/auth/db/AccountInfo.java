@@ -35,8 +35,7 @@ public class AccountInfo {
 			redisTemplate.opsForValue().set(RedisUtil.buildUserAccountKey(username), account);
 			redisTemplate.expire(RedisUtil.buildUserAccountKey(username), 1, TimeUnit.DAYS);
 			
-		}
-		
+		}	
 		return account;
 	}
 	

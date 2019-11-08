@@ -1,4 +1,4 @@
-package com.sculler.core.auth.pojo;
+package com.sculler.core.auth.basic;
 
 public class BasicDigestInfo {
 	

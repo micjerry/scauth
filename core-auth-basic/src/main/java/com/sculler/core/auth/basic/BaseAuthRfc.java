@@ -1,10 +1,10 @@
-package com.sculler.core.auth.pojo;
+package com.sculler.core.auth.basic;
 
 import org.apache.commons.lang3.StringUtils;
 
 public class BaseAuthRfc {
-	public static final String AUTHORIZATION = "Authorization";
-	public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
+	public static final String HEADER_FORWARDED_USER = "X-Forwarded-User";
+	
 	public static final String DIGEST_NAME = "Digest ";
 	public static final String DIGEST_REALM_KEY = "realm";
 	public static final String DIGEST_REALM_DOMAIN = "auth@scullerps.com";
