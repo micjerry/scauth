@@ -1,12 +1,6 @@
-package com.sculler.core.auth.basic;
+package com.sculler.core.auth.api.digest;
 
-public class ScToken {
-	static final int DEFAULT_TOKEN_EXPIRESECONDS = 1800;
-	
-	static final int DEFAULT_REFRESH_EXPIREDAYS = 7;
-	
-	static final int DEFAULT_USERREFTOKEN_EXPIREDAYS = 15;
-	
+public class ScToken {	
 	private String username;
 	
 	private String token;

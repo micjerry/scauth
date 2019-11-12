@@ -17,10 +17,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sculler.core.auth.basic.BaseAuthRfc;
-import com.sculler.core.auth.basic.BasicDigestInfo;
-import com.sculler.core.auth.basic.BasicDigest;
-import com.sculler.core.auth.basic.ScToken;
+import com.sculler.core.auth.api.digest.ScBasicDigest;
+import com.sculler.core.auth.api.digest.ScToken;
 import com.sculler.core.auth.pojo.LoginRequestPojo;
 import com.sculler.core.auth.pojo.LoginResponsePojo;
 import com.sculler.core.auth.pojo.LogoutRequestPojo;
@@ -31,20 +29,17 @@ import com.sculler.core.auth.pojo.RefreshTokenResponsePojo;
 public class AuthController {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
+	public static final String DIGEST_REALM_DOMAIN = "auth@scullerps.com";
+	
 	@Autowired
-	private BasicDigest digest;
+	private ScBasicDigest digest;
 	
 	@RequestMapping(value = { "/sc/core/auth/login" }, method = RequestMethod.POST, consumes = "application/json")
 	@ResponseBody
 	public ResponseEntity<LoginResponsePojo> login( @RequestBody LoginRequestPojo pojo,
 			@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
 		if (!StringUtils.isBlank(authorization)) {
-			BasicDigestInfo digestInfo = BaseAuthRfc.parseAuthrization(authorization);
-			if (null == digestInfo) {
-				logger.error("invalid digest header.");
-				return new ResponseEntity<LoginResponsePojo>(null, null, HttpStatus.FORBIDDEN);
-			}
-			ScToken token = digest.verifyChallenge(digestInfo);
+			ScToken token = digest.loginVerify(authorization);
 			if (null == token) {
 				logger.error("digest failed.");
 				return new ResponseEntity<LoginResponsePojo>(null, null, HttpStatus.FORBIDDEN);
@@ -66,7 +61,7 @@ public class AuthController {
 					StringUtils.isBlank(pojo.getApp())) {
 				return new ResponseEntity<LoginResponsePojo>(null, null, HttpStatus.BAD_REQUEST);
 			}
-			String challengeHeaderValue = digest.makeChallenge(pojo.getUsername());
+			String challengeHeaderValue = digest.loginChallenge(pojo.getUsername(), DIGEST_REALM_DOMAIN);
 			
 			HttpHeaders responseHeaders = new HttpHeaders();
 			responseHeaders.set(HttpHeaders.WWW_AUTHENTICATE, challengeHeaderValue);
@@ -129,7 +124,7 @@ public class AuthController {
 		}
 		
 		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.set(BaseAuthRfc.HEADER_FORWARDED_USER, username);
+		responseHeaders.set(ScBasicDigest.HEADER_FORWARDED_USER, username);
 		return new ResponseEntity<String>(null, responseHeaders, HttpStatus.OK);
 	}
 

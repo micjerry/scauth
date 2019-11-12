@@ -1,6 +1,6 @@
 package com.sculler.core.auth.basic;
 
-public class BasicDigestInfo {
+class BasicDigestInfo {
 	
 	private String username = null;
 	

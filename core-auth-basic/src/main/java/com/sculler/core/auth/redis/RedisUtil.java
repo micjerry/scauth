@@ -1,20 +1,11 @@
 package com.sculler.core.auth.redis;
 
+import com.sculler.core.auth.api.cache.ScAuthKeyType;
+import com.sculler.core.auth.api.cache.ScAuthValueType;
+import com.sculler.core.auth.api.cache.ScCacheContext;
+
 public class RedisUtil {
-	private static final String PREFIX = "auth_";
-	
-	public static final String USERNAME_REFRESHTOKEN = "u2r";
-	public static final String USERNAME_ACCOUNT = "u2a";
-	
-	public static String buildKey(String key) {
-		return PREFIX + key;
-	}
-	
-	public static String buildUserAccountKey(String username) {
-		return PREFIX + username + USERNAME_ACCOUNT;
-	}
-	
-	public static String buildUserRefreshTokenKey(String username) {
-		return PREFIX + username + USERNAME_REFRESHTOKEN;
+	static String buildCacheKey(ScAuthKeyType keyType, String key, ScAuthValueType valueType) {
+		return ScCacheContext.CACHE_PREFIX + key + keyType + valueType;
 	}
 }

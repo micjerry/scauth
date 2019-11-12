@@ -1,27 +1,21 @@
 package com.sculler.core.auth.basic;
 
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import com.sculler.core.auth.api.digest.ScBasicDigest;
+import com.sculler.core.auth.api.digest.ScToken;
 import com.sculler.core.auth.db.AccountInfo;
 import com.sculler.core.auth.db.model.ScAccount;
-import com.sculler.core.auth.redis.RedisUtil;
 
 @Component
-public class BasicDigest {
+class ScBasicDigestImpl implements ScBasicDigest{
 	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-	
-	@Autowired
-	private RedisTemplate<String,String> redisTemplate;
 	
 	@Autowired
 	private AccountInfo accountInfo;
@@ -29,35 +23,35 @@ public class BasicDigest {
 	@Autowired
 	private ScTokenTool tokenTool;
 	
-	public String makeChallenge(String username) {
-		String uuid = UUID.randomUUID().toString().replaceAll("-", "");
-		redisTemplate.opsForValue().set(RedisUtil.buildKey(uuid), username);
-		redisTemplate.expire(RedisUtil.buildKey(uuid), 30, TimeUnit.SECONDS);
-		return BaseAuthRfc.makeDigest(uuid);
+	@Override
+	public String loginChallenge(String username, String realm) {
+		String nonce = tokenTool.createNonce(username);
+		return BaseAuthRfc.makeDigest(nonce, realm);
 	}
 	
-	public ScToken verifyChallenge(BasicDigestInfo digest) {
-		if (null == digest) {
+	@Override
+	public ScToken loginVerify(String authrization) {
+		BasicDigestInfo digest = BaseAuthRfc.parseAuthrization(authrization);
+		if (null == digest || StringUtils.isBlank(digest.getNonce())
+				|| StringUtils.isBlank(digest.getResponse())
+				|| StringUtils.isBlank(digest.getUsername())) {
 			logger.error("invalid digest.");
 			return null;
 		}
 		
-		String nonce = digest.getNonce();
-		String username = redisTemplate.opsForValue().get(RedisUtil.buildKey(nonce));
+		if (!tokenTool.identifyNonce(digest.getNonce(), digest.getUsername())) {
+			logger.error("invalid username challenge for£º {} ", digest.getUsername());
+		}
 		
-		if (StringUtils.isBlank(username)) {
-			logger.error("no challenge for digest username: {}", digest.getUsername());
+		ScAccount account = accountInfo.getAccount(digest.getUsername());
+		
+		if (null == account) {
+			logger.error("no account for username: {} ", digest.getUsername());
 			return null;
 		}
 		
-		if (!username.equals(digest.getUsername())) {
-			logger.error("invalid username challenge for£º {} response: {}", username, digest.getUsername());
-		}
-		
-		ScAccount account = accountInfo.getAccount(username);
-		
-		if (null == account) {
-			logger.error("no account for username: {}", username);
+		if (account.getForbid() == 1) {
+			logger.error("account is forbid for username: {} ", digest.getUsername());
 			return null;
 		}
 		
@@ -69,19 +63,22 @@ public class BasicDigest {
 			return null;
 		}
 		
-		ScToken token = tokenTool.createToken(username);
+		ScToken token = tokenTool.createToken(digest.getUsername());
 		
 		return token;
 	}
 	
+	@Override
 	public void logout(String refreshToken) {
-		tokenTool.clearRefreshToken(refreshToken);
+		tokenTool.clearRereshToken(refreshToken);
 	}
 	
+	@Override
 	public ScToken refresh(String refreshToken) {
 		return tokenTool.refreshToken(refreshToken);
 	}
 	
+	@Override
 	public String authentication(String token) {
 		return tokenTool.identifyToken(token);
 	}

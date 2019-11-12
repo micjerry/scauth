@@ -2,24 +2,21 @@ package com.sculler.core.auth.basic;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class BaseAuthRfc {
-	public static final String HEADER_FORWARDED_USER = "X-Forwarded-User";
-	
+class BaseAuthRfc {
 	public static final String DIGEST_NAME = "Digest ";
 	public static final String DIGEST_REALM_KEY = "realm";
-	public static final String DIGEST_REALM_DOMAIN = "auth@scullerps.com";
 	
 	public static final String DIGEST_NONCE_KEY = "nonce";
 	public static final String DIGEST_USERNAME_KEY = "username";
 	public static final String DIGEST_RESPONSE_KEY = "response";
 	
-	public static String makeDigest(String nonce) 
+	public static String makeDigest(String nonce, String realm) 
 	{
 		StringBuilder strb = new StringBuilder(DIGEST_NAME);
 		strb.append(DIGEST_REALM_KEY);
 		strb.append("=");
 		strb.append("\"");
-		strb.append(DIGEST_REALM_DOMAIN);
+		strb.append(realm);
 		strb.append("\"");
 		strb.append(",");
 		strb.append(DIGEST_NONCE_KEY);

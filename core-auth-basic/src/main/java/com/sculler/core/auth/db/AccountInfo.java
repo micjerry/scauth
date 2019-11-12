@@ -1,16 +1,12 @@
 package com.sculler.core.auth.db;
 
-import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import com.sculler.core.auth.db.model.ScAccount;
 import com.sculler.core.auth.db.repository.ScAccountRepository;
-import com.sculler.core.auth.redis.RedisUtil;
 
 @Component
 public class AccountInfo {
@@ -21,10 +17,10 @@ public class AccountInfo {
 	private ScAccountRepository scAccountRespository;
 	
 	@Autowired
-	private RedisTemplate<String, Object> redisTemplate;
+	private ScAccountCache cacheTool;
 	
 	public ScAccount getAccount(String username) {
-		ScAccount account = (ScAccount)redisTemplate.opsForValue().get(RedisUtil.buildKey(username));
+		ScAccount account = cacheTool.getAccount(username);
 		if (null == account) {
 			account = scAccountRespository.findByUsername(username);
 			if (null == account) {
@@ -32,9 +28,7 @@ public class AccountInfo {
 				return null;
 			}
 			
-			redisTemplate.opsForValue().set(RedisUtil.buildUserAccountKey(username), account);
-			redisTemplate.expire(RedisUtil.buildUserAccountKey(username), 1, TimeUnit.DAYS);
-			
+			cacheTool.cacheAccount(username, account);			
 		}	
 		return account;
 	}
