@@ -1,0 +1,2 @@
+# scauth
+Basic digest auth
